@@ -8,13 +8,14 @@ class LangRule {
   ruleRE: RegExp
   type: string
 
-  constructor(ruleName: string, ruleRE: string, type = LangRuleType.DEFAULT) {
+  constructor(ruleName: string, ruleRE: string, type = LangRuleHandleType.DEFAULT) {
     this.ruleName = ruleName;
     this.ruleRE = new RegExp(ruleRE);
     this.type = type;
   }
 }
 
+//定义各种规则名称
 class LangRuleName {
   static INIT = 'INIT'
   static ID = 'ID'
@@ -25,26 +26,51 @@ class LangRuleName {
   static Slash = 'Slash'
   static OPERATE = 'OPERATE'
 }
-
-class LangRuleType {
+//规则处理类型，默认和自定义，自定义的为可追加类型
+class LangRuleHandleType {
   static DEFAULT = 'DEFAULT'
   static CUSTOM = 'CUSTOM'
 }
-
+//token类
 class Token {
   type: string
   text: string
 }
 
+// const parse = 'age >= 45'
+//结果
+/*[
+  Token { type: 'ID', text: 'age' },
+  Token { type: 'OPERATE', text: '>=' },
+  Token { type: 'NUM', text: '45' }
+]*/
+
+// const parse = 'int age = 40'
+//结果
+/*[
+  Token { type: 'ID', text: 'int' },
+  Token { type: 'ID', text: 'age' },
+  Token { type: 'OPERATE', text: '=' },
+  Token { type: 'NUM', text: '40' }
+]*/
+
 const parse = '2+3*5'
+//结果
+/*[
+  Token { type: 'NUM', text: '2' },
+  Token { type: 'PLUS', text: '+' },
+  Token { type: 'NUM', text: '3' },
+  Token { type: 'Star', text: '*' },
+  Token { type: 'NUM', text: '5' }
+]*/
 
 const parseAry = parse.split('')
 
 //语言规则Map
 const langRuleMap = new Map<string, LangRule>()
 //设置各种规则和名称
-langRuleMap.set(LangRuleName.ID, new LangRule(LangRuleName.ID, '[a-zA-Z_]', LangRuleType.CUSTOM))
-langRuleMap.set(LangRuleName.NUM, new LangRule(LangRuleName.NUM, '\\d', LangRuleType.CUSTOM))
+langRuleMap.set(LangRuleName.ID, new LangRule(LangRuleName.ID, '[a-zA-Z_]', LangRuleHandleType.CUSTOM))
+langRuleMap.set(LangRuleName.NUM, new LangRule(LangRuleName.NUM, '\\d', LangRuleHandleType.CUSTOM))
 langRuleMap.set(LangRuleName.PLUS, new LangRule(LangRuleName.PLUS, '\\+'))
 langRuleMap.set(LangRuleName.Minus, new LangRule(LangRuleName.Minus, '\\-'))
 langRuleMap.set(LangRuleName.Star, new LangRule(LangRuleName.Star, '\\*'))
@@ -55,7 +81,7 @@ const langRuleNames: string[] = []
 for (const langRuleName of langRuleMap.keys()) {
   const langRule = langRuleMap.get(langRuleName)
   //只有custom的才需要追加，否则都是直接新建
-  if (langRule.type === LangRuleType.CUSTOM) {
+  if (langRule.type === LangRuleHandleType.CUSTOM) {
     langRuleNames.push(langRuleName)
   }
 }
